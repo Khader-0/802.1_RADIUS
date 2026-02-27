@@ -27,6 +27,26 @@
   <meta name="twitter:description" content="Slide-based overview of 802.1X and RADIUS wireless authentication — EAP methods, architecture, and deployment. By Khader M Khudair." />
   <meta name="twitter:image" content="images/kali-aircrack-ng.png" />
 
+  <!-- Mermaid diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: 'transparent',
+        primaryColor: '#164e63',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#22d3ee',
+        lineColor: '#67e8f9',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#1e293b',
+        edgeLabelBackground: '#0f172a',
+        fontFamily: 'ui-sans-serif, system-ui, Segoe UI, Roboto, Arial'
+      }
+    });
+  </script>
+
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -321,40 +341,67 @@
       </div>
     </section>
 
-    <!-- Slide 7: Practical demo -->
-    <section class="slide relative flex min-h-screen items-center">
-      <div class="mx-auto max-w-6xl px-6 py-16">
+    <!-- Slide 7: Sequence Diagram -->
+    <section class="slide relative flex flex-col justify-center min-h-screen">
+      <div class="mx-auto max-w-6xl px-6 py-10 w-full">
         <div class="slide-inner">
-          <h2 class="text-4xl font-semibold">Practical demo idea (bonus marks)</h2>
+          <h2 class="text-4xl font-semibold">How it works &mdash; <span class="text-cyan-300">Authentication flow</span></h2>
+          <p class="mt-3 text-slate-400 text-sm">Step-by-step message exchange between Client, AP, RADIUS, and Identity Store</p>
 
-          <div class="mt-8 grid gap-6 lg:grid-cols-2">
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-              <h3 class="text-lg font-semibold">Demo you can show in class</h3>
-              <ul class="mt-4 space-y-2 text-slate-300">
-                <li>• Connect to an enterprise SSID (or a lab SSID)</li>
-                <li>• Show the Wi-Fi login prompt</li>
-                <li>• Point out fields: identity/username, password, certificate/CA</li>
-                <li>• Explain: “AP forwards auth to RADIUS”</li>
-              </ul>
+          <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 overflow-auto" style="max-height:62vh;">
+            <div class="mermaid" style="min-width:600px;">
+%%{init: {"sequence": {"mirrorActors": false, "actorMargin": 40, "width": 130, "height": 28, "boxMargin": 4, "noteMargin": 6, "messageMargin": 22, "useMaxWidth": true}}}%%
+sequenceDiagram
+    participant C as Client
+    participant AP as Access Point
+    participant R as RADIUS Server
+    participant DB as AD/LDAP
 
-              <div class="mt-6 rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
-                What you say: <span class="text-slate-100 font-semibold">“This is not a shared Wi-Fi password. This is 802.1X identity authentication via RADIUS.”</span>
-              </div>
+    C->>AP: Connect to SSID
+    AP-->>C: EAP-Request/Identity
+    C->>AP: EAP-Response (Username)
+    AP->>R: RADIUS Access-Request
+    R->>DB: Verify credentials
+    DB-->>R: Valid / Invalid
+
+    alt Valid Credentials
+        R-->>AP: Access-Accept
+        AP-->>C: EAP-Success
+        AP->>C: Network access granted
+    else Invalid Credentials
+        R-->>AP: Access-Reject
+        AP-->>C: EAP-Failure
+    end
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
-              <h3 class="text-lg font-semibold">Simple lab example (safe)</h3>
-              <p class="mt-3 text-slate-300">
-                You can mention a basic lab stack (no attack steps):
-              </p>
-              <ul class="mt-4 space-y-2 text-slate-300">
-                <li>• Access Point configured for WPA2-Enterprise</li>
-                <li>• RADIUS server (e.g., FreeRADIUS or Microsoft NPS)</li>
-                <li>• Users stored in AD/LDAP or a local user file</li>
-              </ul>
-              <p class="mt-5 text-sm text-slate-400">
-                Optional: show a network diagram (client → AP → RADIUS → directory).
-              </p>
+    <!-- Slide 8: Flowchart -->
+    <section class="slide relative flex flex-col justify-center min-h-screen hidden">
+      <div class="mx-auto max-w-6xl px-6 py-10 w-full">
+        <div class="slide-inner">
+          <h2 class="text-4xl font-semibold">How it works &mdash; <span class="text-cyan-300">Component flow</span></h2>
+          <p class="mt-3 text-slate-400 text-sm">End-to-end path from user device to network access</p>
+
+          <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 overflow-auto" style="max-height:62vh;">
+            <div class="mermaid">
+%%{init: {"flowchart": {"useMaxWidth": true, "htmlLabels": true}}}%%
+flowchart LR
+    C["User Device<br>Supplicant"]
+    AP["Access Point<br>Authenticator"]
+    R["RADIUS Server"]
+    DB["User DB<br>AD / LDAP"]
+    NET["Network<br>Internet"]
+
+    C -- EAP Auth --> AP
+    AP -- RADIUS Request --> R
+    R -- Query --> DB
+    DB -- Result --> R
+    R -- Accept/Reject --> AP
+    AP -- Allow/Block --> C
+    AP --> NET
             </div>
           </div>
         </div>
