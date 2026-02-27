@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>802.1X + RADIUS | Wireless Authentication (Slides)</title>
+  <link rel="icon" type="image/png" href="images/favico.png" />
+
+  <!-- SEO: Primary meta tags -->
+  <meta name="title" content="802.1X + RADIUS | Wireless Authentication" />
+  <meta name="description" content="A detailed slide-based overview of 802.1X and RADIUS wireless authentication — EAP methods, architecture, and deployment. Prepared by Khader M Khudair — Student 120191118." />
+  <meta name="keywords" content="802.1X, RADIUS, wireless authentication, EAP, WPA2 Enterprise, network security, Kali Linux, Wi-Fi security" />
+  <meta name="author" content="Khader M Khudair" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- SEO: Open Graph / Facebook / WhatsApp / LinkedIn link preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="802.1X + RADIUS | Wireless Authentication" />
+  <meta property="og:description" content="Slide-based overview of 802.1X and RADIUS wireless authentication — EAP methods, architecture, and deployment. By Khader M Khudair." />
+  <meta property="og:image" content="images/kali-aircrack-ng.png" />
+  <meta property="og:image:alt" content="802.1X RADIUS Wireless Authentication preview" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- SEO: Twitter / X card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="802.1X + RADIUS | Wireless Authentication" />
+  <meta name="twitter:description" content="Slide-based overview of 802.1X and RADIUS wireless authentication — EAP methods, architecture, and deployment. By Khader M Khudair." />
+  <meta name="twitter:image" content="images/kali-aircrack-ng.png" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["ui-sans-serif", "system-ui", "Segoe UI", "Roboto", "Arial"] }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Smooth snap experience */
+    html, body { height: 100%; }
+    .slides {
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .slide { scroll-snap-align: start; scroll-snap-stop: always; }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <!-- Background glow -->
+  <div class="pointer-events-none fixed inset-0">
+    <div class="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-cyan-500/15 blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-emerald-500/10 blur-3xl"></div>
+  </div>
+
+  <!-- Top bar -->
+  <div class="fixed left-0 right-0 top-0 z-50">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-cyan-200">
+        <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+        <span class="text-sm">802.1X • RADIUS • WPA2/3-Enterprise</span>
+      </div>
+
+      <div class="hidden items-center gap-2 text-sm text-slate-300 sm:flex">
+        <span class="rounded-full border border-slate-800 bg-slate-900/40 px-3 py-1">Scroll</span>
+        <span class="text-slate-500">or</span>
+        <span class="rounded-full border border-slate-800 bg-slate-900/40 px-3 py-1">↓ / ↑</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slides container -->
+  <main id="slides" class="slides relative pt-16">
+    <!-- Slide 1: Title -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-16 lg:grid-cols-2 lg:items-center">
+        <div class="slide-inner">
+          <h1 class="text-5xl font-semibold tracking-tight sm:text-6xl">
+            802.1X + <span class="text-cyan-300">RADIUS</span><br />
+            Authentication in Wireless Networks
+          </h1>
+          <p class="mt-5 max-w-xl text-lg text-slate-300">
+            A slide-style technical overview of how enterprise Wi-Fi authenticates users with identities,
+            not shared passwords.
+          </p>
+
+          <div class="mt-7 flex flex-wrap gap-3">
+            <button data-goto="1"
+              class="rounded-xl bg-cyan-500 px-5 py-3 font-medium text-slate-950 shadow-lg shadow-cyan-500/20">
+              Start
+            </button>
+            <button data-goto="7"
+              class="rounded-xl border border-slate-700 bg-slate-900/50 px-5 py-3 font-medium text-slate-100">
+              Jump to Demo
+            </button>
+          </div>
+
+          <p class="mt-6 text-sm text-slate-400">
+            Key idea: <span class="text-slate-200">Per-user authentication</span> (WPA2/3-Enterprise) instead of a shared PSK.
+          </p>
+        </div>
+
+        <div class="slide-inner">
+          <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+            <h3 class="text-lg font-semibold">Quick comparison</h3>
+            <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+                <p class="text-sm font-semibold text-slate-200">Home Wi-Fi</p>
+                <p class="mt-1 text-sm text-slate-400">WPA2-PSK / WPA3-SAE</p>
+                <ul class="mt-3 space-y-1 text-sm text-slate-300">
+                  <li>• One shared password</li>
+                  <li>• Hard to track individuals</li>
+                  <li>• Password gets shared/leaked</li>
+                </ul>
+              </div>
+              <div class="rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-4">
+                <p class="text-sm font-semibold text-cyan-200">Enterprise Wi-Fi</p>
+                <p class="mt-1 text-sm text-slate-400">WPA2/3-Enterprise (802.1X)</p>
+                <ul class="mt-3 space-y-1 text-sm text-slate-300">
+                  <li>• Per-user credentials</li>
+                  <li>• Central policy + logging</li>
+                  <li>• Stronger control & auditing</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="mt-5 rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
+              <span class="font-semibold text-slate-100">Scope:</span>
+              Defensive learning only. No attack steps.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 2: What is 802.1X -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner max-w-3xl">
+          <h2 class="text-4xl font-semibold">What is 802.1X?</h2>
+          <p class="mt-4 text-lg text-slate-300">
+            <span class="text-cyan-200 font-semibold">IEEE 802.1X</span> is a standard for
+            <span class="text-slate-100 font-semibold">port-based network access control</span>.
+            It authenticates a user/device <span class="text-slate-100 font-semibold">before</span> granting network access.
+          </p>
+
+          <div class="mt-7 grid gap-4 sm:grid-cols-2">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
+              <p class="text-sm font-semibold text-slate-200">Used in</p>
+              <ul class="mt-3 space-y-1 text-sm text-slate-300">
+                <li>• WPA2-Enterprise</li>
+                <li>• WPA3-Enterprise</li>
+                <li>• Wired 802.1X (switch ports)</li>
+              </ul>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
+              <p class="text-sm font-semibold text-slate-200">Replaces</p>
+              <ul class="mt-3 space-y-1 text-sm text-slate-300">
+                <li>• Shared Wi-Fi passwords (PSK)</li>
+                <li>• “Everyone knows the same key”</li>
+                <li>• Weak accountability</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="mt-7 text-sm text-slate-400">
+            Core concept: the AP acts as a gatekeeper; the identity check happens on a central server.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3: What is RADIUS -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner max-w-3xl">
+          <h2 class="text-4xl font-semibold">What is RADIUS?</h2>
+          <p class="mt-4 text-lg text-slate-300">
+            <span class="text-cyan-200 font-semibold">RADIUS</span> (Remote Authentication Dial-In User Service)
+            is an AAA protocol used for:
+            <span class="text-slate-100 font-semibold">Authentication</span>,
+            <span class="text-slate-100 font-semibold">Authorization</span>,
+            and <span class="text-slate-100 font-semibold">Accounting</span>.
+          </p>
+
+          <div class="mt-7 rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+            <h3 class="text-lg font-semibold">Why it matters for Wi-Fi</h3>
+            <ul class="mt-4 space-y-2 text-slate-300">
+              <li>• Central place to validate users (Active Directory / LDAP / local DB)</li>
+              <li>• Enforces policies (who can join, which VLAN, which role)</li>
+              <li>• Logs every login attempt for auditing</li>
+            </ul>
+          </div>
+
+          <p class="mt-6 text-sm text-slate-400">
+            Common servers: FreeRADIUS, Microsoft NPS, Aruba ClearPass, Cisco ISE.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4: Components -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner">
+          <h2 class="text-4xl font-semibold">The 3 key components</h2>
+
+          <div class="mt-8 grid gap-5 lg:grid-cols-3">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <p class="text-sm text-cyan-300">Supplicant</p>
+              <h3 class="mt-2 text-xl font-semibold">Client device</h3>
+              <p class="mt-2 text-slate-300">
+                Laptop/phone that requests access and runs EAP authentication.
+              </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <p class="text-sm text-cyan-300">Authenticator</p>
+              <h3 class="mt-2 text-xl font-semibold">Access Point (AP)</h3>
+              <p class="mt-2 text-slate-300">
+                Controls access and forwards authentication messages to RADIUS.
+              </p>
+            </div>
+
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-6">
+              <p class="text-sm text-cyan-300">Authentication Server</p>
+              <h3 class="mt-2 text-xl font-semibold">RADIUS</h3>
+              <p class="mt-2 text-slate-300">
+                Validates credentials and returns an “accept/deny” decision + policy.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-7 rounded-2xl border border-slate-800 bg-slate-900/40 p-6 text-sm text-slate-300">
+            <span class="font-semibold text-slate-100">Key point:</span>
+            The AP does not “know” the password — it asks the RADIUS server to verify identity.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5: EAP flow -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner">
+          <h2 class="text-4xl font-semibold">How it works (EAP flow)</h2>
+
+          <div class="mt-8 grid gap-6 lg:grid-cols-2">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Step-by-step</h3>
+              <ol class="mt-4 space-y-2 text-slate-300">
+                <li><span class="text-cyan-200 font-semibold">1)</span> Client connects to SSID</li>
+                <li><span class="text-cyan-200 font-semibold">2)</span> AP blocks network access (pre-auth)</li>
+                <li><span class="text-cyan-200 font-semibold">3)</span> EAP identity exchange starts</li>
+                <li><span class="text-cyan-200 font-semibold">4)</span> AP forwards EAP to RADIUS</li>
+                <li><span class="text-cyan-200 font-semibold">5)</span> RADIUS validates user (AD/LDAP)</li>
+                <li><span class="text-cyan-200 font-semibold">6)</span> Access-Accept + policy returned</li>
+                <li><span class="text-cyan-200 font-semibold">7)</span> Client gets network access</li>
+              </ol>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">What gets enforced</h3>
+              <ul class="mt-4 space-y-2 text-slate-300">
+                <li>• Role-based access (staff vs guest)</li>
+                <li>• VLAN assignment</li>
+                <li>• Time-based policies</li>
+                <li>• MFA / certificate requirements</li>
+                <li>• Logging (accounting)</li>
+              </ul>
+
+              <div class="mt-6 rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
+                EAP methods include: PEAP, EAP-TLS, TTLS (varies by organization).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6: Why secure -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner max-w-4xl">
+          <h2 class="text-4xl font-semibold">Why it’s more secure than PSK</h2>
+
+          <div class="mt-8 grid gap-5 sm:grid-cols-2">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Identity-based access</h3>
+              <p class="mt-2 text-slate-300">
+                Every user/device has its own credentials (or certificate). No shared password to leak.
+              </p>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Stronger auditing</h3>
+              <p class="mt-2 text-slate-300">
+                RADIUS logs who connected, when, and from which device — useful for incident response.
+              </p>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Dynamic session keys</h3>
+              <p class="mt-2 text-slate-300">
+                Enterprise authentication negotiates per-session encryption material, improving isolation.
+              </p>
+            </div>
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-6">
+              <h3 class="text-lg font-semibold">Central policy control</h3>
+              <p class="mt-2 text-slate-300">
+                One place to enforce posture, roles, VLANs, and revoke access instantly.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7: Practical demo -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner">
+          <h2 class="text-4xl font-semibold">Practical demo idea (bonus marks)</h2>
+
+          <div class="mt-8 grid gap-6 lg:grid-cols-2">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Demo you can show in class</h3>
+              <ul class="mt-4 space-y-2 text-slate-300">
+                <li>• Connect to an enterprise SSID (or a lab SSID)</li>
+                <li>• Show the Wi-Fi login prompt</li>
+                <li>• Point out fields: identity/username, password, certificate/CA</li>
+                <li>• Explain: “AP forwards auth to RADIUS”</li>
+              </ul>
+
+              <div class="mt-6 rounded-xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
+                What you say: <span class="text-slate-100 font-semibold">“This is not a shared Wi-Fi password. This is 802.1X identity authentication via RADIUS.”</span>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Simple lab example (safe)</h3>
+              <p class="mt-3 text-slate-300">
+                You can mention a basic lab stack (no attack steps):
+              </p>
+              <ul class="mt-4 space-y-2 text-slate-300">
+                <li>• Access Point configured for WPA2-Enterprise</li>
+                <li>• RADIUS server (e.g., FreeRADIUS or Microsoft NPS)</li>
+                <li>• Users stored in AD/LDAP or a local user file</li>
+              </ul>
+              <p class="mt-5 text-sm text-slate-400">
+                Optional: show a network diagram (client → AP → RADIUS → directory).
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8: Real-world usage -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner max-w-4xl">
+          <h2 class="text-4xl font-semibold">Where you see it in real life</h2>
+          <p class="mt-4 text-lg text-slate-300">
+            802.1X is standard in enterprise environments where access must be controlled and audited:
+          </p>
+
+          <div class="mt-8 grid gap-5 sm:grid-cols-2">
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Universities</h3>
+              <p class="mt-2 text-slate-300">Campus Wi-Fi with personal accounts (e.g., eduroam style setups).</p>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Hospitals</h3>
+              <p class="mt-2 text-slate-300">Segmentation by role/device + strong audit logging.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+              <h3 class="text-lg font-semibold">Enterprises</h3>
+              <p class="mt-2 text-slate-300">Central identity, rapid revocation, policy compliance.</p>
+            </div>
+            <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-6">
+              <h3 class="text-lg font-semibold">Government</h3>
+              <p class="mt-2 text-slate-300">Higher assurance access controls and accountability.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 9: Summary -->
+    <section class="slide relative flex min-h-screen items-center">
+      <div class="mx-auto max-w-6xl px-6 py-16">
+        <div class="slide-inner max-w-4xl">
+          <h2 class="text-4xl font-semibold">Summary</h2>
+
+          <div class="mt-8 rounded-2xl border border-slate-800 bg-slate-900/40 p-7">
+            <ul class="space-y-3 text-lg text-slate-300">
+              <li>• 802.1X enables <span class="text-slate-100 font-semibold">identity-based</span> Wi-Fi access.</li>
+              <li>• The AP is the <span class="text-slate-100 font-semibold">Authenticator</span>, not the password keeper.</li>
+              <li>• RADIUS provides centralized <span class="text-slate-100 font-semibold">AAA</span> and logging.</li>
+              <li>• Enterprise Wi-Fi improves control, segmentation, and auditability.</li>
+            </ul>
+
+            <div class="mt-7 flex flex-wrap gap-3">
+              <button data-goto="0"
+                class="rounded-xl border border-slate-700 bg-slate-900/50 px-5 py-3 font-medium text-slate-100">
+                Back to top
+              </button>
+              <button data-goto="7"
+                class="rounded-xl bg-cyan-500 px-5 py-3 font-medium text-slate-950 shadow-lg shadow-cyan-500/20">
+                Demo slide
+              </button>
+            </div>
+          </div>
+
+          <p class="mt-6 text-sm text-slate-400">
+            Tip: Add one screenshot of an enterprise Wi-Fi login prompt to maximize clarity and marks.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom hint -->
+    <div class="pointer-events-none fixed bottom-5 left-0 right-0 z-40">
+      <div class="mx-auto flex max-w-6xl justify-center px-6">
+        <div class="rounded-full border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs text-slate-300">
+          Slide <span id="slideIndex" class="text-cyan-200 font-semibold">1</span> / <span id="slideTotal">9</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    const slidesEl = document.getElementById("slides");
+    const slideEls = Array.from(document.querySelectorAll(".slide"));
+    const slideIndexEl = document.getElementById("slideIndex");
+    const slideTotalEl = document.getElementById("slideTotal");
+    slideTotalEl.textContent = String(slideEls.length);
+
+    // Animate in currently visible slide
+    function animateSlideIn(slide) {
+      const inner = slide.querySelectorAll(".slide-inner, .slide-inner *");
+      gsap.fromTo(inner,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", stagger: 0.02 }
+      );
+    }
+
+    // Observe slides to update counter + trigger animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = slideEls.indexOf(entry.target);
+          slideIndexEl.textContent = String(idx + 1);
+          animateSlideIn(entry.target);
+        }
+      });
+    }, { root: slidesEl, threshold: 0.55 });
+
+    slideEls.forEach(s => observer.observe(s));
+
+    // Go to slide buttons
+    document.querySelectorAll("[data-goto]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-goto"));
+        slideEls[i]?.scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    // Keyboard navigation
+    window.addEventListener("keydown", (e) => {
+      const current = Number(slideIndexEl.textContent) - 1;
+      if (e.key === "ArrowDown" || e.key === "PageDown") {
+        slideEls[Math.min(current + 1, slideEls.length - 1)]?.scrollIntoView({ behavior: "smooth" });
+      }
+      if (e.key === "ArrowUp" || e.key === "PageUp") {
+        slideEls[Math.max(current - 1, 0)]?.scrollIntoView({ behavior: "smooth" });
+      }
+      if (e.key === "Home") slideEls[0]?.scrollIntoView({ behavior: "smooth" });
+      if (e.key === "End") slideEls[slideEls.length - 1]?.scrollIntoView({ behavior: "smooth" });
+    });
+
+    // First slide entrance
+    animateSlideIn(slideEls[0]);
+  </script>
+</body>
+</html>
